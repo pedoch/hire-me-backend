@@ -1,0 +1,4 @@
+{
+	"mongoURI": "mongodb+srv://deltanboi:cf7P8lO8rF0lQM8h@cluster0-bjxhf.mongodb.net/schoolproject?retryWrites=true&w=majority",
+	"jwtSecret": "schoolproject"
+}
