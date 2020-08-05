@@ -7,7 +7,9 @@ const auth = require('../middleware/is-auth');
 // @route GET api/posts
 router.get('/get-post/:postId', postController.getPost);
 
-router.get('/get-posts', auth, postController.getCompanyPosts);
+router.get('/get-company-posts', auth, postController.getCompanyPosts);
+
+router.get('/get-posts', auth, postController.getPosts);
 
 router.get(
   '/get-post-with-status',
