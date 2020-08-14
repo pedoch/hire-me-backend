@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const UserSchema = new mongoose.Schema({
@@ -31,27 +31,25 @@ const UserSchema = new mongoose.Schema({
   posts: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'post',
+      ref: "post",
     },
   ],
   streetAddress: {
     type: String,
   },
   state: {
-    type: Schema.Types.ObjectId,
-    ref: 'state',
+    type: String,
   },
   status: {
     type: String,
     required: true,
-    enum: ['Active', 'Disabled'],
+    enum: ["Active", "Disabled"],
   },
   tags: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'tag',
+      type: String,
     },
   ],
 });
 
-module.exports = User = mongoose.model('user', UserSchema);
+module.exports = User = mongoose.model("user", UserSchema);
