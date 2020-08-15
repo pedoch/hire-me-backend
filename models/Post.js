@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const PostSchema = new mongoose.Schema(
@@ -11,6 +11,11 @@ const PostSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    employmentType: {
+      type: String,
+      required: true,
+      enum: ["Full-Time", "Part-Time", "Contract"],
+    },
     requirements: [
       {
         type: String,
@@ -19,30 +24,31 @@ const PostSchema = new mongoose.Schema(
     responses: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'response',
+        ref: "response",
       },
     ],
+    numberOfResponses: {
+      type: Number,
+    },
     streetAddress: {
       type: String,
     },
     state: {
-      type: Schema.Types.ObjectId,
-      ref: 'state',
+      type: String,
     },
     companyId: {
       type: Schema.Types.ObjectId,
-      ref: 'company',
+      ref: "company",
       required: true,
     },
     status: {
-      type: 'String',
-      enum: ['Active', 'Suspended', 'Deleted'],
+      type: "String",
+      enum: ["Active", "Suspended", "Deleted"],
       required: true,
     },
     tags: [
       {
-        type: Schema.Types.ObjectId,
-        ref: 'tag',
+        type: String,
       },
     ],
   },
@@ -51,4 +57,4 @@ const PostSchema = new mongoose.Schema(
   }
 );
 
-module.exports = Post = mongoose.model('post', PostSchema);
+module.exports = Post = mongoose.model("post", PostSchema);
