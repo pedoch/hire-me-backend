@@ -34,6 +34,12 @@ const UserSchema = new mongoose.Schema({
       ref: "post",
     },
   ],
+  savedPosts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "post",
+    },
+  ],
   streetAddress: {
     type: String,
   },
