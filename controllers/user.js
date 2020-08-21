@@ -1,11 +1,11 @@
-const User = require('../models/User');
-const fileHelper = require('../util/file');
-const { validationResult } = require('express-validator');
-const jwt = require('jsonwebtoken');
-const config = require('config');
-const bcrypt = require('bcryptjs');
-const sgMail = require('@sendgrid/mail');
-require('dotenv').config();
+const User = require("../models/User");
+const fileHelper = require("../util/file");
+const { validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
+const config = require("config");
+const bcrypt = require("bcryptjs");
+const sgMail = require("@sendgrid/mail");
+require("dotenv").config();
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -23,7 +23,7 @@ exports.signunp = async (req, res, next) => {
     let user = await User.findOne({ email });
 
     if (user) {
-      return res.status(400).json({ errors: [{ msg: 'Email address has already been used' }] });
+      return res.status(400).json({ errors: [{ msg: "Email address has already been used" }] });
     }
 
     user = new User({
@@ -33,7 +33,7 @@ exports.signunp = async (req, res, next) => {
       password,
       posts: [],
       tags: [],
-      status: 'Active',
+      status: "Active",
     });
 
     //Encrypt password
@@ -47,9 +47,9 @@ exports.signunp = async (req, res, next) => {
     //send email after registration
     const msg = {
       to: email,
-      from: 'test@hiremeo.com',
-      subject: 'Registration complete',
-      html: '<h1>You have successfully registered on Hire-Me-O!</h1>',
+      from: "test@hiremeo.com",
+      subject: "Registration complete",
+      html: "<h1>You have successfully registered on Hire-Me-O!</h1>",
     };
     sgMail.send(msg).catch((err) => console.log(err));
 
@@ -60,15 +60,15 @@ exports.signunp = async (req, res, next) => {
       },
     };
 
-    jwt.sign(payload, config.get('jwtSecret'), (err, token) => {
+    jwt.sign(payload, config.get("jwtSecret"), (err, token) => {
       if (err) throw err;
-      res.json({ token, message: 'User registered successfully' });
+      res.json({ token, message: "User registered successfully" });
     });
 
     // res.send('User registered');
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -80,7 +80,7 @@ exports.editUserSettings = async (req, res, next) => {
 
   let userId = req.user.id;
 
-  const { firstname, lastname, bio, profilePicture, streetAddress, state, tags } = req.body;
+  const { firstname, lastname, bio, streetAddress, state, tags } = req.body;
 
   let profilePictureFile = req.file;
 
@@ -90,19 +90,15 @@ exports.editUserSettings = async (req, res, next) => {
     let user = await User.findById(userId);
 
     if (!user) {
-      return res.status(400).json({ errors: [{ message: 'User does not exist' }] });
+      return res.status(400).json({ errors: [{ message: "User does not exist" }] });
     }
 
-    if (user.status === 'Disabled')
-      return res.status(400).json({ message: 'User account is disabled, cannot update settings' });
+    if (user.status === "Disabled")
+      return res.status(400).json({ message: "User account is disabled, cannot update settings" });
 
     user.firstname = firstname;
     user.lastname = lastname;
     user.bio = bio;
-    if (profilePictureFile) {
-      fileHelper.deleteFile(profilePicture);
-      user.profilePicture = profilePictureFile.path;
-    }
     user.streetAddress = streetAddress;
     user.state = state;
     user.tags = tags;
@@ -118,9 +114,9 @@ exports.editUserSettings = async (req, res, next) => {
     //send email after registration
     const msg = {
       to: email,
-      from: 'test@hiremeo.com',
-      subject: 'Registration complete',
-      html: '<h1>You have successfully registered on Hire-Me-O!</h1>',
+      from: "test@hiremeo.com",
+      subject: "Registration complete",
+      html: "<h1>You have successfully registered on Hire-Me-O!</h1>",
     };
     sgMail.send(msg).catch((err) => console.log(err));
 
@@ -131,14 +127,14 @@ exports.editUserSettings = async (req, res, next) => {
       },
     };
 
-    jwt.sign(payload, config.get('jwtSecret'), (err, token) => {
+    jwt.sign(payload, config.get("jwtSecret"), (err, token) => {
       if (err) throw err;
-      res.json({ token, message: 'User registered successfully' });
+      res.json({ token, message: "User registered successfully" });
     });
 
     // res.send('User registered');
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
