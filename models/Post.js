@@ -16,6 +16,10 @@ const PostSchema = new mongoose.Schema(
       required: true,
       enum: ["Full-Time", "Part-Time", "Contract"],
     },
+    salary: {
+      type: String,
+      required: true,
+    },
     requirements: [
       {
         type: String,

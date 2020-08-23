@@ -208,7 +208,16 @@ exports.createPost = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { title, description, employmentType, requirements, state, streetAddress, tags } = req.body;
+  const {
+    title,
+    description,
+    employmentType,
+    requirements,
+    state,
+    streetAddress,
+    tags,
+    salary,
+  } = req.body;
 
   const companyId = req.company.id;
 
@@ -225,6 +234,7 @@ exports.createPost = async (req, res, next) => {
       description: description,
       employmentType: employmentType,
       requirements: requirements,
+      salary: salary,
       numberOfResponses: numberOfResponses,
       streetAddress: streetAddress,
       state: state,
