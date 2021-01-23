@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const UserSchema = new mongoose.Schema({
@@ -22,19 +22,28 @@ const UserSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
+  skills: [
+    {
+      name: String,
+      yearsOfExperience: Number,
+    },
+  ],
+  yearsOfExperience: {
+    type: Number,
+  },
   resume: {
     type: String,
   },
   posts: [
     {
       type: Schema.Types.ObjectId,
-      ref: "post",
+      ref: 'post',
     },
   ],
   savedPosts: [
     {
       type: Schema.Types.ObjectId,
-      ref: "post",
+      ref: 'post',
     },
   ],
   streetAddress: {
@@ -46,13 +55,19 @@ const UserSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: ["Active", "Disabled", "Pending"],
+    enum: ['Active', 'Disabled', 'Pending'],
   },
   tags: [
     {
       type: String,
     },
   ],
+  subscribed: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'company',
+    },
+  ],
 });
 
-module.exports = User = mongoose.model("user", UserSchema);
+module.exports = User = mongoose.model('user', UserSchema);

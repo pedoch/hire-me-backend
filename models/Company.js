@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const CompanySchema = new mongoose.Schema({
@@ -19,7 +19,7 @@ const CompanySchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: ["Active", "Disabled", "Pending"],
+    enum: ['Active', 'Disabled', 'Pending'],
   },
   description: {
     type: String,
@@ -36,7 +36,7 @@ const CompanySchema = new mongoose.Schema({
   posts: [
     {
       type: Schema.Types.ObjectId,
-      ref: "post",
+      ref: 'post',
     },
   ],
   tags: [
@@ -44,6 +44,12 @@ const CompanySchema = new mongoose.Schema({
       type: String,
     },
   ],
+  subscribers: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+    },
+  ],
 });
 
-module.exports = Company = mongoose.model("company", CompanySchema);
+module.exports = Company = mongoose.model('company', CompanySchema);
