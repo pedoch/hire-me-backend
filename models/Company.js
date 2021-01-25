@@ -41,15 +41,13 @@ const CompanySchema = new mongoose.Schema({
   ],
   tags: [
     {
-      type: String,
-    },
-  ],
-  subscribers: [
-    {
       type: Schema.Types.ObjectId,
-      ref: 'user',
+      ref: 'tag',
     },
   ],
+  subscribers: {
+    type: Number,
+  },
 });
 
 module.exports = Company = mongoose.model('company', CompanySchema);

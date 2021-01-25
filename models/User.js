@@ -59,7 +59,8 @@ const UserSchema = new mongoose.Schema({
   },
   tags: [
     {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'tag',
     },
   ],
   subscribed: [
