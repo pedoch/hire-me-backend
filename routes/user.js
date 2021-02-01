@@ -18,21 +18,21 @@ router.post(
     check('tags', 'At least one tag is required').not().isEmpty(),
     check('state', 'State is required').not().isEmpty(),
   ],
-  userController.signunp,
+  userController.signup,
 );
 
 router.post(
-  '/edit-settings',
+  '/edit-profile',
   auth,
   [
     check('firstname', 'Firstname is required').not().isEmpty(),
     check('lastname', 'Lastname is required').not().isEmpty(),
     check('email', 'Please include a valid email address').isEmail(),
-    check('password', 'Please enter a password with 5 or more characters').isLength({ min: 5 }),
-    check('tags', 'At least one tag is required').not().isEmpty(),
     check('state', 'State is required').not().isEmpty(),
   ],
   userController.editUserSettings,
 );
+
+router.post('/update-profile-picture', auth, userController.uploadProfilePicture);
 
 module.exports = router;

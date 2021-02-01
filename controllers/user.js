@@ -9,7 +9,7 @@ require('dotenv').config();
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-exports.signunp = async (req, res, next) => {
+exports.signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -83,11 +83,10 @@ exports.editUserSettings = async (req, res, next) => {
 
   let userId = req.user.id;
 
-  const { firstname, lastname, bio, streetAddress, state, tags, profilePictureFile } = req.body;
+  const { firstname, lastname, bio, streetAddress, state, email } = req.body;
 
   try {
     //See if the user exists
-
     let user = await User.findById(userId);
 
     if (!user) {
@@ -95,23 +94,69 @@ exports.editUserSettings = async (req, res, next) => {
     }
 
     if (user.status === 'Disabled')
-      return res.status(400).json({ message: 'User account is disabled, cannot update settings' });
+      return res.status(400).json({
+        message: 'User account is disabled, cannot update settings. Please enable account first.',
+      });
 
     user.firstname = firstname;
     user.lastname = lastname;
+    user.email = email;
     user.bio = bio;
     user.streetAddress = streetAddress;
     user.state = state;
-    user.tags = tags;
-    user.profilePictureFile = profilePictureFile;
 
     await user.save();
 
-    res.json({ message: 'User profile edited successfully' });
-
-    // res.send('User registered');
+    res.json({
+      user: {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        bio: user.bio,
+        streetAddress: user.streetAddress,
+        state: user.state,
+      },
+      message: 'User profile edited successfully',
+    });
   } catch (err) {
     console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.uploadProfilePicture = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let userId = req.user.id;
+
+  const { profilePicture } = req.body;
+
+  try {
+    //See if the user exists
+    let user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({ errors: [{ message: 'User does not exist' }] });
+    }
+
+    if (user.status === 'Disabled')
+      return res.status(400).json({
+        message: 'User account is disabled, cannot update settings. Please enable account first.',
+      });
+
+    user.profilePicture = profilePicture;
+
+    await user.save();
+
+    res.json({
+      user: { profilePicture: user.profilePicture },
+      message: 'User profile picture updated successfully',
+    });
+  } catch (err) {
+    console.error(err.meessage);
     res.status(500).send('Server Error');
   }
 };
