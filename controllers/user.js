@@ -83,9 +83,7 @@ exports.editUserSettings = async (req, res, next) => {
 
   let userId = req.user.id;
 
-  const { firstname, lastname, bio, streetAddress, state, tags } = req.body;
-
-  let profilePictureFile = req.file;
+  const { firstname, lastname, bio, streetAddress, state, tags, profilePictureFile } = req.body;
 
   try {
     //See if the user exists
@@ -105,35 +103,11 @@ exports.editUserSettings = async (req, res, next) => {
     user.streetAddress = streetAddress;
     user.state = state;
     user.tags = tags;
-
-    //Encrypt password
-
-    const salt = await bcrypt.genSalt(10);
-
-    user.password = await bcrypt.hash(password, salt);
+    user.profilePictureFile = profilePictureFile;
 
     await user.save();
 
-    //send email after registration
-    const msg = {
-      to: email,
-      from: 'test@hiremeo.com',
-      subject: 'Registration complete',
-      html: '<h1>You have successfully registered on Hire-Me-O!</h1>',
-    };
-    sgMail.send(msg).catch((err) => console.log(err));
-
-    //Return JWT
-    const payload = {
-      user: {
-        id: user._id,
-      },
-    };
-
-    jwt.sign(payload, config.get('jwtSecret'), (err, token) => {
-      if (err) throw err;
-      res.json({ token, message: 'User registered successfully' });
-    });
+    res.json({ message: 'User profile edited successfully' });
 
     // res.send('User registered');
   } catch (err) {
