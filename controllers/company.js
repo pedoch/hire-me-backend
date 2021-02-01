@@ -82,7 +82,7 @@ exports.editCompanySettings = async (req, res, next) => {
 
   let companyId = req.company.id;
 
-  const { name, description, profilePicture, tags } = req.body;
+  const { name, email, description, streetAddress, state } = req.body;
 
   try {
     //See if the company exists
@@ -104,15 +104,57 @@ exports.editCompanySettings = async (req, res, next) => {
     }
 
     company.name = name;
+    company.email = email;
     company.description = description;
-    company.profilePicture = profilePicture;
-    company.tags = tags;
+    company.streetAddress = streetAddress;
+    company.state = state;
 
     await company.save();
 
-    res.json({ message: 'Company updated successfully' });
+    res.json({
+      company: { name, email, description, streetAddress, state },
+      message: 'Company profile updated successfully',
+    });
   } catch (err) {
     console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.uploadProfilePicture = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let companyId = req.company.id;
+
+  const { profilePicture } = req.body;
+
+  try {
+    //See if the user exists
+    let company = await Company.findById(companyId);
+
+    if (!company) {
+      return res.status(400).json({ errors: [{ message: 'Company does not exist' }] });
+    }
+
+    if (company.status === 'Disabled')
+      return res.status(400).json({
+        message:
+          'Company account is disabled, cannot update settings. Please enable account first.',
+      });
+
+    company.profilePicture = profilePicture;
+
+    await company.save();
+
+    res.json({
+      company: { profilePicture: company.profilePicture },
+      message: 'Company profile picture updated successfully',
+    });
+  } catch (err) {
+    console.error(err.meessage);
     res.status(500).send('Server Error');
   }
 };
