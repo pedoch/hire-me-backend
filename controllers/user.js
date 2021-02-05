@@ -35,6 +35,7 @@ exports.signup = async (req, res, next) => {
       state,
       bio,
       posts: [],
+      resumes: [],
       tags,
       status: 'Active',
     });
