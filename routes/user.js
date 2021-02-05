@@ -33,7 +33,7 @@ router.post(
   userController.editUserSettings,
 );
 
-router.post('/edit-skills', auth, userController.editUserSettings);
+router.post('/edit-skills', auth, userController.editUserSkills);
 
 router.post('/update-profile-picture', auth, userController.uploadProfilePicture);
 
