@@ -69,7 +69,7 @@ exports.login = async (req, res, next) => {
           posts: user.posts,
           savedPosts: user.savedPosts,
           streetAddress: user.streetAddress,
-          proflePicture: user.proflePicture,
+          profilePicture: user.profilePicture,
           state: user.state,
           status: user.status,
           tags: user.tags,
