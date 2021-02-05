@@ -54,6 +54,14 @@ const PostSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    yearsOfExperience: {
+      type: Number,
+    },
+    skills: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,
