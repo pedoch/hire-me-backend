@@ -124,6 +124,47 @@ exports.editUserSettings = async (req, res, next) => {
   }
 };
 
+exports.editUserSkills = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let userId = req.user.id;
+
+  const { yearsOfExperience, skills } = req.body;
+
+  try {
+    //See if the user exists
+    let user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({ errors: [{ message: 'User does not exist' }] });
+    }
+
+    if (user.status === 'Disabled')
+      return res.status(400).json({
+        message: 'User account is disabled, cannot update settings. Please enable account first.',
+      });
+
+    user.yearsOfExperience = yearsOfExperience;
+    user.skills = skills;
+
+    await user.save();
+
+    res.json({
+      user: {
+        yearsOfExperience,
+        skills,
+      },
+      message: 'User skills and experience edited successfully',
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 exports.uploadProfilePicture = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
