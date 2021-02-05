@@ -116,7 +116,21 @@ exports.companyLogin = async (req, res, next) => {
 
     jwt.sign(payload, config.get('jwtSecret'), (err, token) => {
       if (err) throw err;
-      res.json({ token });
+      res.json({
+        token,
+        user: {
+          name: company.name,
+          email: company.email,
+          description: company.description,
+          posts: company.posts,
+          streetAddress: company.streetAddress,
+          profilePicture: company.profilePicture,
+          subscribers: company.subscribers,
+          state: company.state,
+          status: company.status,
+          tags: company.tags,
+        },
+      });
     });
   } catch (err) {
     console.error(err.message);
