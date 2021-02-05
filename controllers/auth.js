@@ -122,4 +122,46 @@ exports.companyLogin = async (req, res, next) => {
     res.status(500).send('Server Error');
   }
 };
+
+exports.updateUserPassword = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let userId = req.user.id;
+
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    //See if user exits
+    let user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({ errors: [{ msg: 'User does not exist' }] });
+    }
+
+    //matching user details
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ errors: [{ msg: 'Old password is incorrect' }] });
+    }
+
+    //Encrypt password
+
+    const salt = await bcrypt.genSalt(10);
+
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    await user.save();
+
+    res.json({
+      message: 'User password updated successfully',
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
 // 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
