@@ -225,12 +225,12 @@ exports.uploadResume = async (req, res, next) => {
         message: 'User account is disabled, cannot update settings. Please enable account first.',
       });
 
-    user.resume = resume;
+    user.resumes = [...user.resumes, resume];
 
     await user.save();
 
     res.json({
-      user: { resume: user.resume },
+      user: { resumes: user.resumes },
       message: 'User resume updated successfully',
     });
   } catch (err) {

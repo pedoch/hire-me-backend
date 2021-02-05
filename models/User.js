@@ -37,7 +37,8 @@ const UserSchema = new mongoose.Schema(
     },
     resumes: [
       {
-        type: String,
+        name: String,
+        url: String,
       },
     ],
     posts: [
