@@ -9,7 +9,8 @@ const ResponseSchema = new mongoose.Schema(
       required: true,
     },
     resume: {
-      type: String,
+      name: String,
+      url: String,
     },
     skills: [
       {
