@@ -160,3 +160,40 @@ exports.uploadProfilePicture = async (req, res, next) => {
     res.status(500).send('Server Error');
   }
 };
+
+exports.uploadResume = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let userId = req.user.id;
+
+  const { resume } = req.body;
+
+  try {
+    //See if the user exists
+    let user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({ errors: [{ message: 'User does not exist' }] });
+    }
+
+    if (user.status === 'Disabled')
+      return res.status(400).json({
+        message: 'User account is disabled, cannot update settings. Please enable account first.',
+      });
+
+    user.resume = resume;
+
+    await user.save();
+
+    res.json({
+      user: { resume: user.resume },
+      message: 'User resume updated successfully',
+    });
+  } catch (err) {
+    console.error(err.meessage);
+    res.status(500).send('Server Error');
+  }
+};

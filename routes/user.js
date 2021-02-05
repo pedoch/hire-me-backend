@@ -35,4 +35,6 @@ router.post(
 
 router.post('/update-profile-picture', auth, userController.uploadProfilePicture);
 
+router.post('/update-resume', auth, userController.uploadResume);
+
 module.exports = router;
