@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema(
     yearsOfExperience: {
       type: Number,
     },
-    resumes: {
+    resume: {
       name: String,
       url: String,
     },
