@@ -61,6 +61,7 @@ exports.login = async (req, res, next) => {
       res.json({
         token,
         user: {
+          _id: user._id,
           firstname: user.firstname,
           lastname: user.lastname,
           email: user.email,
@@ -119,6 +120,7 @@ exports.companyLogin = async (req, res, next) => {
       res.json({
         token,
         user: {
+          _id: company._id,
           name: company.name,
           email: company.email,
           description: company.description,
