@@ -1,4 +1,5 @@
 const Company = require('../models/Company');
+const Post = require('../models/Post');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -172,18 +173,15 @@ exports.getPosts = async (req, res, next) => {
   }
 
   try {
-    let company = await Company.findById(companyId)
-      .populate({
-        path: 'posts',
-        populate: {
-          path: 'tags',
-        },
-      })
-      .exec();
+    let company = await Company.findById(companyId);
 
     if (!company) return res.status(400).json({ message: 'Company not found' });
 
-    return res.status(200).json({ posts: company.posts });
+    let posts = await Post.find({ companyId: companyId, status: { $ne: 'Deleted' } })
+      .populate({ path: 'tags' })
+      .exec();
+
+    return res.status(200).json({ posts: posts });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
