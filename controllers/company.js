@@ -87,7 +87,7 @@ exports.editCompanySettings = async (req, res, next) => {
   try {
     //See if the company exists
 
-    let company = await Company.findById({ companyId });
+    let company = await Company.findById(companyId);
 
     if (!company) {
       return res.status(404).json({ errors: [{ msg: 'Company not found' }] });
