@@ -259,7 +259,7 @@ exports.createPost = async (req, res, next) => {
       to: company.email,
       from: 'test@hiremeo.com',
       subject: 'Registration complete',
-      html: `<h1>You just posted "<a target="_blanc" href="https://hire-me-o.netlify.app/${company.name}/dashboard/posts/${post._id}" >${post.title}</a>" successfully</h1>`,
+      html: `<h1>You just posted "<a target="_blanc"  rel="noopener" href="https://hire-me-o.netlify.app/job/${post._id}" >${post.title}</a>" successfully</h1>`,
     };
     sgMail.send(msg).catch((err) => console.log(err));
 
