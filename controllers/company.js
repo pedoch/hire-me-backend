@@ -173,9 +173,12 @@ exports.getPosts = async (req, res, next) => {
 
   try {
     let company = await Company.findById(companyId)
-      .populate('posts')
-      .populate('posts.tags')
-      .populate('posts.responses')
+      .populate({
+        path: 'posts',
+        populate: {
+          path: 'tags',
+        },
+      })
       .exec();
 
     if (!company) return res.status(400).json({ message: 'Company not found' });
