@@ -258,12 +258,12 @@ exports.createPost = async (req, res, next) => {
     const msg = {
       to: company.email,
       from: 'test@hiremeo.com',
-      subject: 'Registration complete',
+      subject: 'Job Posted Successfully',
       html: `<h1>You just posted "<a target="_blanc"  rel="noopener" href="https://hire-me-o.netlify.app/job/${post._id}" >${post.title}</a>" successfully</h1>`,
     };
     sgMail.send(msg).catch((err) => console.log(err));
 
-    res.status(201).json({ message: 'Post successful', post });
+    res.status(201).json({ posts: company.posts, message: 'Post successful', post });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
