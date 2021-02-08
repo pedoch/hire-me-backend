@@ -158,3 +158,30 @@ exports.uploadProfilePicture = async (req, res, next) => {
     res.status(500).send('Server Error');
   }
 };
+
+exports.getPosts = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let companyId = req.company.id;
+
+  if (!companyId) {
+    return res.status(400).json({ message: 'Company does not exist' });
+  }
+
+  try {
+    let company = await Company.findById(companyId)
+      .populate('posts')
+      .populate('posts.responses')
+      .execPopulate();
+
+    if (!company) return res.status(400).json({ message: 'Company not found' });
+
+    return res.status(200).json({ posts: company.posts });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};

@@ -27,6 +27,8 @@ router.post(
   companyController.editCompanySettings,
 );
 
+router.get('/get-posts', auth, companyController.getPosts);
+
 router.post('/update-profile-picture', auth, companyController.uploadProfilePicture);
 
 module.exports = router;
