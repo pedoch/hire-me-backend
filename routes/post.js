@@ -35,6 +35,8 @@ router.post(
   postController.createPost,
 );
 
+router.get('/get-company-posts', auth, postController.getCompanyPosts);
+
 router.post(
   '/change-post-status',
   auth,
