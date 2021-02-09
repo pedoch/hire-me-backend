@@ -353,7 +353,7 @@ exports.getResponses = async (req, res, next) => {
     return res.status(400).json({ message: 'Company does not exist' });
   }
 
-  const { postId } = req.body;
+  const { postId } = req.params;
 
   try {
     let company = await Company.findById(companyId);
