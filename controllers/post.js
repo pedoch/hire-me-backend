@@ -54,6 +54,30 @@ exports.getTopPosts = async (req, res, next) => {
   }
 };
 
+exports.getTopPostsForYou = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const userId = req.user.id;
+
+  try {
+    let user = await User.findById(userId);
+
+    if (!user) res.status(400).json({ messgae: 'User not found' });
+    let posts = await Post.find({ status: 'Active', tags: { $in: user.tags } })
+      .sort({ numberOfResponses: -1 })
+      .populate('companyId')
+      .exec();
+
+    res.status(200).json({ posts });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 exports.getPosts = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

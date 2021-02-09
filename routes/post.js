@@ -13,6 +13,8 @@ router.get('/get-filtered-posts', auth, postController.getFilteredPostsAndCompan
 
 router.get('/get-top-posts', auth, postController.getTopPosts);
 
+router.get('/get-top-posts-for-you', auth, postController.getTopPostsForYou);
+
 router.get(
   '/get-post-with-status',
   auth,
