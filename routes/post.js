@@ -52,4 +52,11 @@ router.post(
   postController.respondToPost,
 );
 
+router.get(
+  '/get-responses',
+  auth,
+  [check('postId', 'Post ID not specified').not().isEmpty()],
+  postController.getResponses,
+);
+
 module.exports = router;

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Company = require('../models/Company');
 const Post = require('../models/Post');
+const Response = require('../models/Response');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -307,7 +308,7 @@ exports.respondToPost = async (req, res, next) => {
   if (req.user) {
     const userId = req.user.id;
 
-    const { postId } = req.body;
+    const { postId, resume, skills } = req.body;
 
     try {
       const user = await User.findById(userId);
@@ -318,12 +319,15 @@ exports.respondToPost = async (req, res, next) => {
 
       if (!post) return res.status(400).json({ message: 'Post not found' });
 
-      post.responses.push(userId);
+      const response = new Response({ userId, resume, skills });
+
+      post.responses.push(response._id);
       if (post.numberOfResponses) post.numberOfResponses += 1;
       else post.numberOfResponses = 1;
 
       user.posts.push(postId);
 
+      await response.save();
       await post.save();
       await user.save();
 
@@ -335,4 +339,44 @@ exports.respondToPost = async (req, res, next) => {
   }
 
   return res.status(400).json({ message: 'No user not found' });
+};
+
+exports.getResponses = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let companyId = req.company.id;
+
+  if (!companyId) {
+    return res.status(400).json({ message: 'Company does not exist' });
+  }
+
+  const { postId } = req.body;
+
+  try {
+    let company = await Company.findById(companyId);
+
+    if (!company) return res.status(401).json({ message: 'Company not found' });
+
+    if (!company.posts.includes(postId))
+      return res.status(400).json({ message: 'You are not authorized to view these responses.' });
+
+    const post = await Post.findById(postId)
+      .populate({
+        path: 'responses',
+        populate: { path: 'userId', select: '_id firstname lastname email' },
+      })
+      .exec();
+
+    if (!post) return res.status(400).json({ message: 'Post not found' });
+
+    const { responses } = post;
+
+    return res.status(200).json({ responses, message: 'Responses pulled successfully' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Server Error');
+  }
 };
