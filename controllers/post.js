@@ -64,26 +64,50 @@ exports.getPosts = async (req, res, next) => {
 
   try {
     if (company) {
-      let comp = await (await Company.findById(company.id))
-        .populate('posts')
-        .populate('posts.response')
-        .execPopulate();
+      let comp = await Company.findById(company.id)
+        .populate({
+          path: 'posts',
+          populate: {
+            path: 'responses',
+            populate: {
+              path: 'userId',
+              select: '_id firstname lastname email profilePicture resume skills',
+            },
+          },
+        })
+        .exec();
 
       if (!comp) return res.status(400).json({ message: 'Company not found' });
 
       return res.status(200).json({ posts: comp.posts });
+    } else if (user) {
+      let usr = await User.findById(user.id)
+        .populate({
+          path: 'posts',
+          populate: {
+            path: 'companyId',
+            select: '_id name email profilePicture',
+          },
+        })
+        .populate({
+          path: 'posts',
+          populate: {
+            path: 'responses',
+            match: {
+              'responses.userId': user._id,
+            },
+          },
+        })
+        .exec();
+
+      if (!usr) return res.status(400).json({ message: 'User not found' });
+
+      return res.status(200).json({ posts: usr.posts });
     }
 
-    let usr = await User.findById(user.id)
-      .populate('posts')
-      .populate('posts.companyId')
-      .execPopulate();
-
-    if (!user) return res.status(400).json({ message: 'User not found' });
-
-    return res.status(200).json({ post: usr.posts });
+    return res.status(401).json({ message: 'Account does not exist.' });
   } catch (err) {
-    console.error(err.message);
+    console.error(err);
     res.status(500).send('Server Error');
   }
 };
