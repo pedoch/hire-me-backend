@@ -159,8 +159,9 @@ exports.getFilteredPostsAndCompanies = async (req, res, next) => {
       };
     }
     if (tags) {
-      filter = { ...filter, tags: { $in: tags } };
-      companyFilter = { ...companyFilter, tags: { $in: tags } };
+      let tagList = tags.split(',');
+      filter = { ...filter, tags: { $in: tagList } };
+      companyFilter = { ...companyFilter, tags: { $in: tagList } };
     }
     if (state) {
       filter = { ...filter, state: state };
