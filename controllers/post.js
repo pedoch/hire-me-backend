@@ -142,52 +142,46 @@ exports.getFilteredPostsAndCompanies = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { user } = req;
-
-  const { name, tags, state, postCurrentPage, companyCurrentPage } = req.body;
+  const { name, tags, state } = req.query;
 
   try {
-    let fetcheduser = await User.findById(user.id);
-
-    if (!fetcheduser) return res.status(400).json({ message: 'User not found' });
-
     let filter = {};
     let companyFilter = {};
 
     if (name) {
-      filter = { ...filter, name: { $regex: name, $options: 'i' } };
-      companyFilter = { ...companyFilter, name: { $regex: name, $options: 'i' } };
+      filter = {
+        ...filter,
+        title: { $regex: new RegExp(name), $options: 'i' },
+      };
+      companyFilter = {
+        ...companyFilter,
+        name: { $regex: new RegExp(name), $options: 'i' },
+      };
     }
     if (tags) {
       filter = { ...filter, tags: { $in: tags } };
       companyFilter = { ...companyFilter, tags: { $in: tags } };
     }
-    if (state) filter = { ...filter, state: state };
-
-    const postskip = postCurrentPage ? postCurrentPage * 200 : 0;
-    const companyskip = companyCurrentPage ? companyCurrentPage * 200 : 0;
+    if (state) {
+      filter = { ...filter, state: state };
+      companyFilter = { ...companyFilter, state: state };
+    }
 
     const posts = await Post.find({ ...filter })
       .sort({ $natural: -1 })
-      .skip(postskip)
-      .limit(200)
-      .populate('companyId')
-      .execPopulate();
+      .populate('companyId', '-password')
+      .populate('tags')
+      .exec();
 
     const companies = await Company.find({ ...companyFilter })
+      .select('-password')
       .sort({ $natural: -1 })
-      .skip(companyskip)
-      .limit(200)
-      .populate('companyId')
-      .execPopulate();
+      .populate('tags')
+      .exec();
 
     return res.status(200).json({
       post: posts,
       companies: companies,
-      postCurrentPage: page ? page + 1 : 1,
-      companyCurrentPage: page ? page + 1 : 1,
-      postLast: post.length < 1 ? true : false,
-      companyLast: companies.length < 1 ? true : false,
     });
   } catch (err) {
     console.error(err.message);
