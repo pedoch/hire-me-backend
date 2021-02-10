@@ -11,7 +11,7 @@ router.get('/get-posts', auth, postController.getPosts);
 
 router.get('/get-filtered-posts', auth, postController.getFilteredPostsAndCompanies);
 
-router.get('/get-top-posts', auth, postController.getTopPosts);
+router.get('/get-top-posts', postController.getTopPosts);
 
 router.get('/get-top-posts-for-you', auth, postController.getTopPostsForYou);
 

@@ -42,12 +42,12 @@ exports.getTopPosts = async (req, res, next) => {
   }
 
   try {
-    let post = await Post.find({ status: 'Active' })
+    let posts = await Post.find({ status: 'Active' })
       .sort({ numberOfResponses: -1 })
       .populate('companyId')
-      .execPopulate();
+      .exec();
 
-    res.status(200).json({ post: post });
+    res.status(200).json({ posts });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
