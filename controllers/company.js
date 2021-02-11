@@ -34,6 +34,7 @@ exports.signup = async (req, res, next) => {
       tags,
       state,
       streetAddress,
+      subscribers: 0,
       posts: [],
       status: 'Active',
     });
