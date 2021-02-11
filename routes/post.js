@@ -9,6 +9,8 @@ router.get('/get-post/:postId', postController.getPost);
 
 router.get('/get-posts', auth, postController.getPosts);
 
+router.get('/get-all-posts', postController.getAllPosts);
+
 router.get('/get-filtered-posts', postController.getFilteredPostsAndCompanies);
 
 router.get('/get-top-posts', postController.getTopPosts);

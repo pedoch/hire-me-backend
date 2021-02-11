@@ -22,13 +22,25 @@ exports.getPost = async (req, res, next) => {
   if (!postId) return res.status(400).json({ message: 'Post ID not found.' });
 
   try {
-    let post = await Post.findById(postId)
-      .sort({})
-      .populate('response')
-      .populate('companyId')
-      .execPopulate();
+    let post = await Post.findById(postId).populate('companyId').exec();
 
     res.status(200).json({ post: post });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.getAllPosts = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    let posts = await Post.find().populate('companyId').populate('tags').exec();
+
+    res.status(200).json({ posts });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
