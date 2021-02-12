@@ -58,4 +58,11 @@ router.post(
 
 router.get('/get-responses/:postId', auth, postController.getResponses);
 
+router.post(
+  '/save-post',
+  auth,
+  [check('postId', 'Post not specified').not().isEmpty()],
+  postController.savePost,
+);
+
 module.exports = router;
