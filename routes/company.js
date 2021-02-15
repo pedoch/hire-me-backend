@@ -29,6 +29,13 @@ router.post(
   companyController.editCompanySettings,
 );
 
+router.post(
+  '/subscribe-to-companies',
+  auth,
+  [check('companyId', 'Company ID is not specified.').not().isEmpty()],
+  companyController.subcribeToCompany,
+);
+
 router.get('/get-posts', auth, companyController.getPosts);
 
 router.post('/update-profile-picture', auth, companyController.uploadProfilePicture);
