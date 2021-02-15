@@ -11,6 +11,8 @@ router.post(
     check('name', 'Company name is required').trim().not().isEmpty(),
     check('email', 'Please include a valid email address').isEmail(),
     check('password', 'Please enter a password with 5 or more characters').isLength({ min: 5 }),
+    check('state', 'State is required').not().isEmpty(),
+    check('streetAddress', 'Street Address is required').not().isEmpty(),
   ],
   companyController.signup,
 );
