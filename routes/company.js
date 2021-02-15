@@ -15,6 +15,8 @@ router.post(
   companyController.signup,
 );
 
+router.get('/get-all-companies', companyController.getAllCompanies);
+
 router.post(
   '/edit-profile',
   auth,

@@ -76,6 +76,30 @@ exports.signup = async (req, res, next) => {
   }
 };
 
+exports.getAllCompanies = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    let companies = await Company.find()
+      .populate({
+        path: 'posts',
+        populate: {
+          path: 'tags',
+        },
+      })
+      .populate('tags')
+      .exec();
+
+    res.status(200).json({ companies });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 exports.editCompanySettings = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
