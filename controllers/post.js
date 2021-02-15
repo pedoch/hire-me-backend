@@ -374,6 +374,9 @@ exports.respondToPost = async (req, res, next) => {
 
       if (!post) return res.status(400).json({ message: 'Post not found' });
 
+      if (user.posts.includes(postId))
+        return res.status(400).json({ message: 'User has already applied to post' });
+
       const response = new Response({ userId, resume, skills });
 
       post.responses.push(response._id);
