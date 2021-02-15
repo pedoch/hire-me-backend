@@ -36,6 +36,13 @@ router.post(
   companyController.subcribeToCompany,
 );
 
+router.post(
+  '/unsubscribe-to-companies',
+  auth,
+  [check('companyId', 'Company ID is not specified.').not().isEmpty()],
+  companyController.unsubcribeToCompany,
+);
+
 router.get('/get-posts', auth, companyController.getPosts);
 
 router.post('/update-profile-picture', auth, companyController.uploadProfilePicture);

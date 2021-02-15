@@ -255,3 +255,48 @@ exports.subcribeToCompany = async (req, res, next) => {
 
   return res.status(400).json({ message: 'User not authenticated.' });
 };
+
+exports.unsubcribeToCompany = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  if (req.user) {
+    const userId = req.user.id;
+
+    const { companyId } = req.body;
+
+    try {
+      if (!userId) return res.status(400).json({ message: 'User ID not specified.' });
+
+      const user = await User.findById(userId);
+
+      if (!user) return res.status(400).json({ message: 'User not found.' });
+
+      const company = await Company.findById(companyId);
+
+      if (!company) return res.status(400).json({ message: 'Company not found.' });
+
+      if (!user.subscribed.includes(company._id))
+        return res.status(400).json({ message: 'Compnay not subscribed to.' });
+
+      user.subscribed = user.subscribed.filter((sub) => {
+        if (sub != company._id) return sub;
+      });
+
+      if (company.subscribers && company.subscribers > 0) company.subscribers -= 1;
+      else company.subscribers = 0;
+
+      await user.save();
+      await company.save();
+
+      return res.status(200).json({ message: 'Post saved successfully.' });
+    } catch (err) {
+      console.log(err);
+      res.status(500).send('Server Error');
+    }
+  }
+
+  return res.status(400).json({ message: 'User not authenticated.' });
+};
