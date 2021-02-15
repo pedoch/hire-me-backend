@@ -236,7 +236,7 @@ exports.subcribeToCompany = async (req, res, next) => {
       if (!company) return res.status(400).json({ message: 'Company not found.' });
 
       if (user.subscribed.includes(company._id))
-        return res.status(400).json({ message: 'Compnay already subscribed.' });
+        return res.status(400).json({ message: 'Company already subscribed.' });
 
       user.subscribed.push(company._id);
 
@@ -279,11 +279,13 @@ exports.unsubcribeToCompany = async (req, res, next) => {
       if (!company) return res.status(400).json({ message: 'Company not found.' });
 
       if (!user.subscribed.includes(company._id))
-        return res.status(400).json({ message: 'Compnay not subscribed to.' });
+        return res.status(400).json({ message: 'Company not subscribed to.' });
 
       user.subscribed = user.subscribed.filter((sub) => {
         if (sub != company._id) return sub;
       });
+
+      console.log(user.subscribed);
 
       if (company.subscribers && company.subscribers > 0) company.subscribers -= 1;
       else company.subscribers = 0;
