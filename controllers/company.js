@@ -282,10 +282,8 @@ exports.unsubcribeToCompany = async (req, res, next) => {
         return res.status(400).json({ message: 'Company not subscribed to.' });
 
       user.subscribed = user.subscribed.filter((sub) => {
-        if (sub != company._id) return sub;
+        if (sub.toString() != company._id.toString()) return sub;
       });
-
-      console.log(user.subscribed);
 
       if (company.subscribers && company.subscribers > 0) company.subscribers -= 1;
       else company.subscribers = 0;
