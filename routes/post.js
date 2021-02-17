@@ -17,6 +17,8 @@ router.get('/get-top-posts', postController.getTopPosts);
 
 router.get('/get-top-posts-for-you', auth, postController.getTopPostsForYou);
 
+router.get('/get-saved-posts', auth, postController.getSavedPosts);
+
 router.get(
   '/get-post-with-status',
   auth,

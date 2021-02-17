@@ -148,6 +148,38 @@ exports.getPosts = async (req, res, next) => {
   }
 };
 
+exports.getSavedPosts = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { user } = req;
+
+  try {
+    if (user) {
+      let usr = await User.findById(user.id)
+        .populate({
+          path: 'savedPosts',
+          populate: {
+            path: 'companyId',
+            select: '_id name email profilePicture',
+          },
+        })
+        .exec();
+
+      if (!usr) return res.status(400).json({ message: 'User not found' });
+
+      return res.status(200).json({ posts: usr.savedPosts });
+    }
+
+    return res.status(401).json({ message: 'User does not exist.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+};
+
 exports.getFilteredPostsAndCompanies = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
