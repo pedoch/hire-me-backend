@@ -507,3 +507,44 @@ exports.savePost = async (req, res, next) => {
 
   return res.status(400).json({ message: 'User not authenticated.' });
 };
+
+exports.unsavePost = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  if (req.user) {
+    const userId = req.user.id;
+
+    const { postId } = req.body;
+
+    try {
+      const user = await User.findById(userId);
+
+      if (!user) return res.status(400).json({ message: 'User not found.' });
+
+      const post = await Post.findById(postId);
+
+      if (!post) return res.status(400).json({ message: 'Post not found.' });
+
+      if (!user.savedPosts.includes(post._id))
+        return res.status(400).json({ message: 'Post not saved.' });
+
+      user.savedPosts = user.savePosts.filter((pst) => {
+        if (pst.toString() != post._id.toString()) return pst;
+      });
+
+      await user.save();
+
+      return res
+        .status(200)
+        .json({ message: 'Post saved successfully.', savedPosts: user.savedPosts });
+    } catch (err) {
+      console.log(err);
+      res.status(500).send('Server Error');
+    }
+  }
+
+  return res.status(400).json({ message: 'User not authenticated.' });
+};

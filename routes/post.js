@@ -67,4 +67,11 @@ router.post(
   postController.savePost,
 );
 
+router.post(
+  '/unsave-post',
+  auth,
+  [check('postId', 'Post not specified').not().isEmpty()],
+  postController.unsavePost,
+);
+
 module.exports = router;
