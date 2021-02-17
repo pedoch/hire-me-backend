@@ -531,7 +531,7 @@ exports.unsavePost = async (req, res, next) => {
       if (!user.savedPosts.includes(post._id))
         return res.status(400).json({ message: 'Post not saved.' });
 
-      user.savedPosts = user.savePosts.filter((pst) => {
+      user.savedPosts = user.savedPosts.filter((pst) => {
         if (pst.toString() != post._id.toString()) return pst;
       });
 
