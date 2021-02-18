@@ -18,6 +18,11 @@ const ResponseSchema = new mongoose.Schema(
         yearsOfExperience: Number,
       },
     ],
+    status: {
+      type: String,
+      enum: ['Under Review', 'Rejected', 'Shortlisted'],
+      required: true,
+    },
   },
   {
     timestamps: true,
