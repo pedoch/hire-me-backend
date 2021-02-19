@@ -8,6 +8,11 @@ const ResponseSchema = new mongoose.Schema(
       ref: 'user',
       required: true,
     },
+    postId: {
+      type: Schema.Types.ObjectId,
+      ref: 'post',
+      required: true,
+    },
     resume: {
       name: String,
       url: String,
