@@ -129,16 +129,31 @@ exports.getPosts = async (req, res, next) => {
           path: 'posts',
           populate: {
             path: 'responses',
-            match: {
-              'responses.userId': user._id,
-            },
           },
         })
         .exec();
 
       if (!usr) return res.status(400).json({ message: 'User not found' });
 
-      return res.status(200).json({ posts: usr.posts });
+      let responses = await Response.find({ userId: user.id });
+
+      if (!responses.length > 0) return res.status(400).json({ message: 'User has no responses' });
+
+      const respo = responses.map((value) => value._id.toString());
+
+      let posts = usr.posts.map((post, index) => {
+        let resp = post.responses.filter((res) => {
+          if (respo.includes(res._id.toString())) {
+            return res;
+          }
+        });
+
+        post.responses = resp;
+
+        return post;
+      });
+
+      return res.status(200).json({ posts });
     }
 
     return res.status(401).json({ message: 'Account does not exist.' });
