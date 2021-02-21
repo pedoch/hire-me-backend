@@ -39,4 +39,6 @@ router.post('/update-profile-picture', auth, userController.uploadProfilePicture
 
 router.post('/update-resume', auth, userController.uploadResume);
 
+router.get('/get-companies', auth, userController.getSubscribedCompanies);
+
 module.exports = router;
