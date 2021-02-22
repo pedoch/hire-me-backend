@@ -424,7 +424,13 @@ exports.respondToPost = async (req, res, next) => {
       if (user.posts.includes(postId))
         return res.status(400).json({ message: 'User has already applied to post' });
 
-      const response = new Response({ userId, resume, skills });
+      const response = new Response({
+        userId,
+        resume,
+        skills,
+        status: 'Under Review',
+        postId: postId,
+      });
 
       post.responses.push(response._id);
       if (post.numberOfResponses) post.numberOfResponses += 1;
