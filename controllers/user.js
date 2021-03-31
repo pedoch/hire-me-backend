@@ -174,7 +174,7 @@ exports.uploadProfilePicture = async (req, res, next) => {
 
   let userId = req.user.id;
 
-  let image = req.file;
+  let image = req.files.profilePictureFile[0];
 
   //See if the file was passed
   if (!image)
@@ -208,14 +208,14 @@ exports.uploadProfilePicture = async (req, res, next) => {
 
     await user.save();
 
-    fileHelper.deleteFile(oldImage);
+    if (oldImage) fileHelper.deleteFile(oldImage);
 
     res.json({
       user: { profilePicture: user.profilePicture },
       message: 'User profile picture updated successfully',
     });
   } catch (err) {
-    if (imageURL) fileHelper.deleteFile(imageURL);
+    if (image) fileHelper.deleteFile(imageURL);
 
     console.error(err.meessage);
     res.status(500).send('Server Error');
@@ -230,31 +230,50 @@ exports.uploadResume = async (req, res, next) => {
 
   let userId = req.user.id;
 
-  const { resume } = req.body;
+  let resume = req.files.resumeFile[0];
+
+  //See if the file was passed
+  if (!resume)
+    return res.status(400).json({
+      message: 'Resume was not passed.',
+    });
+
+  let resumeURL = resume.path;
 
   try {
     //See if the user exists
     let user = await User.findById(userId);
 
     if (!user) {
+      fileHelper.deleteFile(resumeURL);
       return res.status(400).json({ errors: [{ message: 'User does not exist' }] });
     }
 
-    if (user.status === 'Disabled')
+    if (user.status === 'Disabled') {
+      fileHelper.deleteFile(resumeURL);
       return res.status(400).json({
         message: 'User account is disabled, cannot update settings. Please enable account first.',
       });
+    }
 
-    user.resume = resume;
+    let oldResume;
+
+    if (user.resume) oldResume = user.resume.url;
+
+    user.resume = { name: resume.originalname, url: resumeURL };
 
     await user.save();
 
+    if (oldResume) fileHelper.deleteFile(oldResume);
+
     res.json({
-      user: { resumes: user.resumes },
+      user: { resume: user.resume },
       message: 'User resume updated successfully',
     });
   } catch (err) {
-    console.error(err.meessage);
+    if (resume) fileHelper.deleteFile(resumeURL);
+
+    console.error(err);
     res.status(500).send('Server Error');
   }
 };

@@ -10,40 +10,39 @@ const connectDB = require('./config/db');
 const app = express();
 
 //setting up file upload tool Multer
-const imgFileStorage = multer.diskStorage({
-  destination: (res, file, cb) => {
-    cb(null, './uploads/profile-pictures');
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // setting destination of uploading files
+    if (file.fieldname === 'resumeFile') {
+      // if uploading resume
+      cb(null, 'uploads/resumes');
+    } else {
+      // else uploading image
+      cb(null, 'uploads/profile-pictures');
+    }
   },
   filename: (req, file, cb) => {
+    // naming file
     cb(null, Date.now() + '-' + file.originalname);
   },
 });
 
-const resumeFileStorage = multer.diskStorage({
-  destination: (res, file, cb) => {
-    cb(null, './uploads/profile-pictures');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
-});
-
-const imgFileFilter = (req, file, cb) => {
-  // Accept images only
-  if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG)$/)) {
-    req.fileValidationError = 'Only image files are allowed!';
-    return cb(new Error('Only image files are allowed!'), false);
+const fileFilter = (req, file, cb) => {
+  if (file.fieldname === 'resumeFile') {
+    // if uploading resume
+    if (!file.originalname.match(/\.(doc|DOC|docx|DOCX|pdf|PDF)$/)) {
+      req.fileValidationError = 'Only doc type files are allowed!';
+      return cb(new Error('Only doc type files are allowed!'), false);
+    }
+    cb(null, true);
+  } else {
+    // else uploading image
+    if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG)$/)) {
+      req.fileValidationError = 'Only image files are allowed!';
+      return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
   }
-  cb(null, true);
-};
-
-const docFileFilter = (req, file, cb) => {
-  // Accept images only
-  if (!file.originalname.match(/\.(doc|DOC|docx|DOCX|pdf|PDF)$/)) {
-    req.fileValidationError = 'Only doc type files are allowed!';
-    return cb(new Error('Only doc type files are allowed!'), false);
-  }
-  cb(null, true);
 };
 
 //registering routes files
@@ -65,17 +64,25 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(
-  multer({ storage: imgFileStorage, fileFilter: imgFileFilter }).single('profilePictureFile'),
+  multer({ storage: fileStorage, fileFilter: fileFilter }).fields([
+    {
+      name: 'resumeFile',
+      maxCount: 1,
+    },
+    {
+      name: 'profilePictureFile',
+      maxCount: 1,
+    },
+  ]),
 );
 app.use(
   '/api/upload/profile-pictures',
   express.static(path.join(__dirname, 'uploads/profile-pictures')),
 );
 
-app.use(multer({ storage: resumeFileStorage, fileFilter: docFileFilter }).single('resumeFile'));
 app.use('/api/upload/resume', express.static(path.join(__dirname, 'uploads/resumes')));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req, res, next) => res.send('API Running...'));
 
