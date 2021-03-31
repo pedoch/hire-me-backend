@@ -174,30 +174,49 @@ exports.uploadProfilePicture = async (req, res, next) => {
 
   let userId = req.user.id;
 
-  const { profilePicture } = req.body;
+  let image = req.file;
+
+  //See if the file was passed
+  if (!image)
+    return res.status(400).json({
+      message: 'Image was not passed.',
+    });
+
+  let imageURL = image.path;
 
   try {
     //See if the user exists
     let user = await User.findById(userId);
 
     if (!user) {
+      fileHelper.deleteFile(imageURL);
       return res.status(400).json({ errors: [{ message: 'User does not exist' }] });
     }
 
-    if (user.status === 'Disabled')
+    if (user.status === 'Disabled') {
+      fileHelper.deleteFile(imageURL);
       return res.status(400).json({
         message: 'User account is disabled, cannot update settings. Please enable account first.',
       });
+    }
 
-    user.profilePicture = profilePicture;
+    let oldImage;
+
+    if (user.profilePicture) oldImage = user.profilePicture;
+
+    user.profilePicture = imageURL;
 
     await user.save();
+
+    fileHelper.deleteFile(oldImage);
 
     res.json({
       user: { profilePicture: user.profilePicture },
       message: 'User profile picture updated successfully',
     });
   } catch (err) {
+    if (imageURL) fileHelper.deleteFile(imageURL);
+
     console.error(err.meessage);
     res.status(500).send('Server Error');
   }
