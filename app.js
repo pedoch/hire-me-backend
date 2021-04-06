@@ -76,13 +76,9 @@ app.use(
   ]),
 );
 app.use(
-  '/api/upload/profile-pictures',
-  express.static(path.join(__dirname, 'uploads/profile-pictures')),
+  '/file',
+  express.static(path.join(__dirname)),
 );
-
-app.use('/api/upload/resume', express.static(path.join(__dirname, 'uploads/resumes')));
-
-app.use(express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req, res, next) => res.send('API Running...'));
 
