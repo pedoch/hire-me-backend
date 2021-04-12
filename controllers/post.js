@@ -1,13 +1,14 @@
-const User = require('../models/User');
-const Company = require('../models/Company');
-const Post = require('../models/Post');
-const Response = require('../models/Response');
-const { validationResult } = require('express-validator');
-const jwt = require('jsonwebtoken');
-const config = require('config');
-const bcrypt = require('bcryptjs');
-const sgMail = require('@sendgrid/mail');
-require('dotenv').config();
+const User = require("../models/User");
+const Company = require("../models/Company");
+const Post = require("../models/Post");
+const Response = require("../models/Response");
+const { validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
+const config = require("config");
+const bcrypt = require("bcryptjs");
+const sgMail = require("@sendgrid/mail");
+var stringSimilarity = require("string-similarity");
+require("dotenv").config();
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -19,15 +20,15 @@ exports.getPost = async (req, res, next) => {
 
   const { postId } = req.params;
 
-  if (!postId) return res.status(400).json({ message: 'Post ID not found.' });
+  if (!postId) return res.status(400).json({ message: "Post ID not found." });
 
   try {
-    let post = await Post.findById(postId).populate('companyId').exec();
+    let post = await Post.findById(postId).populate("companyId").exec();
 
     res.status(200).json({ post: post });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -38,12 +39,12 @@ exports.getAllPosts = async (req, res, next) => {
   }
 
   try {
-    let posts = await Post.find().populate('companyId').populate('tags').exec();
+    let posts = await Post.find().populate("companyId").populate("tags").exec();
 
     res.status(200).json({ posts });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -54,15 +55,15 @@ exports.getTopPosts = async (req, res, next) => {
   }
 
   try {
-    let posts = await Post.find({ status: 'Active' })
+    let posts = await Post.find({ status: "Active" })
       .sort({ numberOfResponses: -1 })
-      .populate('companyId')
+      .populate("companyId")
       .exec();
 
     res.status(200).json({ posts });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -77,16 +78,16 @@ exports.getTopPostsForYou = async (req, res, next) => {
   try {
     let user = await User.findById(userId);
 
-    if (!user) res.status(400).json({ messgae: 'User not found' });
-    let posts = await Post.find({ status: 'Active', tags: { $in: user.tags } })
+    if (!user) res.status(400).json({ messgae: "User not found" });
+    let posts = await Post.find({ status: "Active", tags: { $in: user.tags } })
       .sort({ numberOfResponses: -1 })
-      .populate('companyId')
+      .populate("companyId")
       .exec();
 
     res.status(200).json({ posts });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -102,42 +103,44 @@ exports.getPosts = async (req, res, next) => {
     if (company) {
       let comp = await Company.findById(company.id)
         .populate({
-          path: 'posts',
+          path: "posts",
           populate: {
-            path: 'responses',
+            path: "responses",
             populate: {
-              path: 'userId',
-              select: '_id firstname lastname email profilePicture resume skills',
+              path: "userId",
+              select:
+                "_id firstname lastname email profilePicture resume skills",
             },
           },
         })
         .exec();
 
-      if (!comp) return res.status(400).json({ message: 'Company not found' });
+      if (!comp) return res.status(400).json({ message: "Company not found" });
 
       return res.status(200).json({ posts: comp.posts });
     } else if (user) {
       let usr = await User.findById(user.id)
         .populate({
-          path: 'posts',
+          path: "posts",
           populate: {
-            path: 'companyId',
-            select: '_id name email profilePicture',
+            path: "companyId",
+            select: "_id name email profilePicture",
           },
         })
         .populate({
-          path: 'posts',
+          path: "posts",
           populate: {
-            path: 'responses',
+            path: "responses",
           },
         })
         .exec();
 
-      if (!usr) return res.status(400).json({ message: 'User not found' });
+      if (!usr) return res.status(400).json({ message: "User not found" });
 
       let responses = await Response.find({ userId: user.id });
 
-      if (!responses.length > 0) return res.status(400).json({ message: 'User has no responses' });
+      if (!responses.length > 0)
+        return res.status(400).json({ message: "User has no responses" });
 
       const respo = responses.map((value) => value._id.toString());
 
@@ -156,10 +159,10 @@ exports.getPosts = async (req, res, next) => {
       return res.status(200).json({ posts });
     }
 
-    return res.status(401).json({ message: 'Account does not exist.' });
+    return res.status(401).json({ message: "Account does not exist." });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -175,23 +178,23 @@ exports.getSavedPosts = async (req, res, next) => {
     if (user) {
       let usr = await User.findById(user.id)
         .populate({
-          path: 'savedPosts',
+          path: "savedPosts",
           populate: {
-            path: 'companyId',
-            select: '_id name email profilePicture',
+            path: "companyId",
+            select: "_id name email profilePicture",
           },
         })
         .exec();
 
-      if (!usr) return res.status(400).json({ message: 'User not found' });
+      if (!usr) return res.status(400).json({ message: "User not found" });
 
       return res.status(200).json({ posts: usr.savedPosts });
     }
 
-    return res.status(401).json({ message: 'User does not exist.' });
+    return res.status(401).json({ message: "User does not exist." });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -210,15 +213,15 @@ exports.getFilteredPostsAndCompanies = async (req, res, next) => {
     if (name) {
       filter = {
         ...filter,
-        title: { $regex: new RegExp(name), $options: 'i' },
+        title: { $regex: new RegExp(name), $options: "i" },
       };
       companyFilter = {
         ...companyFilter,
-        name: { $regex: new RegExp(name), $options: 'i' },
+        name: { $regex: new RegExp(name), $options: "i" },
       };
     }
     if (tags) {
-      let tagList = tags.split(',');
+      let tagList = tags.split(",");
       filter = { ...filter, tags: { $in: tagList } };
       companyFilter = { ...companyFilter, tags: { $in: tagList } };
     }
@@ -229,14 +232,14 @@ exports.getFilteredPostsAndCompanies = async (req, res, next) => {
 
     const posts = await Post.find({ ...filter })
       .sort({ $natural: -1 })
-      .populate('companyId', '-password')
-      .populate('tags')
+      .populate("companyId", "-password")
+      .populate("tags")
       .exec();
 
     const companies = await Company.find({ ...companyFilter })
-      .select('-password')
+      .select("-password")
       .sort({ $natural: -1 })
-      .populate('tags')
+      .populate("tags")
       .exec();
 
     return res.status(200).json({
@@ -245,7 +248,7 @@ exports.getFilteredPostsAndCompanies = async (req, res, next) => {
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -260,12 +263,12 @@ exports.getPostsWithStatus = async (req, res, next) => {
 
   try {
     let comp = await (await Company.findById(company.id))
-      .populate('posts')
-      .populate('posts.response')
-      .populate('posts.companyId')
+      .populate("posts")
+      .populate("posts.response")
+      .populate("posts.companyId")
       .execPopulate();
 
-    if (!comp) return res.status(400).json({ message: 'Company not found' });
+    if (!comp) return res.status(400).json({ message: "Company not found" });
 
     const postArray = await comp.posts.filter((post) => {
       if (post.status === status) return post;
@@ -274,7 +277,7 @@ exports.getPostsWithStatus = async (req, res, next) => {
     return res.status(200).json({ posts: postArray });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -287,21 +290,21 @@ exports.getCompany = async (req, res, next) => {
   const companyId = req.params.companyId;
 
   if (!companyId) {
-    return res.status(400).json({ message: 'Company does not exist' });
+    return res.status(400).json({ message: "Company does not exist" });
   }
 
   try {
     let company = await (await Company.findById(companyId))
-      .populate('posts')
-      .populate('posts.response')
+      .populate("posts")
+      .populate("posts.response")
       .execPopulate();
 
-    if (!company) return res.status(400).json({ message: 'Company not found' });
+    if (!company) return res.status(400).json({ message: "Company not found" });
 
     return res.status(200).json({ company: company });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -330,7 +333,9 @@ exports.createPost = async (req, res, next) => {
 
     //check if compnay exists
     if (!company) {
-      return res.status(400).json({ errors: [{ msg: 'Company does not exist' }] });
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Company does not exist" }] });
     }
 
     let post = new Post({
@@ -346,7 +351,7 @@ exports.createPost = async (req, res, next) => {
       companyId: company._id,
       tags: tags,
       responses: [],
-      status: 'Active',
+      status: "Active",
     });
 
     company.posts.push(post._id);
@@ -360,16 +365,18 @@ exports.createPost = async (req, res, next) => {
     //send email after posting
     const msg = {
       to: company.email,
-      from: 'test@hiremeo.com',
-      subject: 'Job Posted Successfully',
+      from: "test@hiremeo.com",
+      subject: "Job Posted Successfully",
       html: `<h1>You just posted "<a target="_blanc"  rel="noopener" href="https://hire-me-o.netlify.app/job/${post._id}" >${post.title}</a>" successfully</h1>`,
     };
     sgMail.send(msg).catch((err) => console.log(err));
 
-    res.status(201).json({ posts: company.posts, message: 'Post successful', post });
+    res
+      .status(201)
+      .json({ posts: company.posts, message: "Post successful", post });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -387,17 +394,20 @@ exports.changePostStatus = async (req, res, next) => {
     let post = await Post.findOne({ _id: postId, companyId });
 
     //check if post exists
-    if (!post) return res.status(400).json({ errors: [{ message: 'Post does not exist' }] });
+    if (!post)
+      return res
+        .status(400)
+        .json({ errors: [{ message: "Post does not exist" }] });
 
     post.status = status;
 
     //save post
     await post.save();
 
-    res.status(201).json({ message: 'Post status changed successfully' });
+    res.status(201).json({ message: "Post status changed successfully" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -413,24 +423,81 @@ exports.respondToPost = async (req, res, next) => {
     const { postId, resume, skills } = req.body;
 
     try {
-      const user = await User.findById(userId);
+      const user = await User.findById(userId).populate("tags").exec();
 
-      if (!user) return res.status(400).json({ message: 'User not found' });
+      if (!user) return res.status(400).json({ message: "User not found" });
 
-      const post = await Post.findById(postId);
+      const post = await Post.findById(postId).populate("tags").exec();
 
-      if (!post) return res.status(400).json({ message: 'Post not found' });
+      if (!post) return res.status(400).json({ message: "Post not found" });
 
       if (user.posts.includes(postId))
-        return res.status(400).json({ message: 'User has already applied to post' });
+        return res
+          .status(400)
+          .json({ message: "User has already applied to post" });
 
       const response = new Response({
         userId,
         resume,
         skills,
-        status: 'Under Review',
+        status: "Under Review",
         postId: postId,
       });
+
+      let postString = "";
+      let responseString = "";
+
+      postString = postString.concat(
+        post.title,
+        " ",
+        post.description,
+        " ",
+        post.employmentType,
+        " ",
+        post.yearsOfExperience || "",
+        " "
+      );
+
+      post.requirements.forEach((requirement) => {
+        postString = postString.concat(requirement);
+        postString = postString.concat(" ");
+      });
+
+      post.tags.forEach((tag) => {
+        postString = postString.concat(tag.name);
+        postString = postString.concat(" ");
+      });
+
+      post.skills.forEach((skill) => {
+        postString = postString.concat(skill);
+        postString = postString.concat(" ");
+      });
+
+      user.tags.forEach((tag) => {
+        responseString = responseString.concat(tag.name);
+        responseString = responseString.concat(" ");
+      });
+
+      user.tags.forEach((tag) => {
+        responseString = responseString.concat(tag.name);
+        responseString = responseString.concat(" ");
+      });
+
+      response.skills.forEach((skill) => {
+        responseString = responseString.concat(
+          skill.name + " - " + skill.yearsOfExperience + ", "
+        );
+      });
+
+      console.log(postString);
+      console.log(responseString);
+
+      const similarity = stringSimilarity.compareTwoStrings(
+        postString,
+        responseString
+      );
+
+      response.relevance = (similarity * 100).toFixed(2);
 
       post.responses.push(response._id);
       if (post.numberOfResponses) post.numberOfResponses += 1;
@@ -442,14 +509,16 @@ exports.respondToPost = async (req, res, next) => {
       await post.save();
       await user.save();
 
-      return res.status(200).json({ message: 'Response submitted successfully' });
+      return res
+        .status(200)
+        .json({ message: "Response submitted successfully" });
     } catch (err) {
       console.log(err);
-      res.status(500).send('Server Error');
+      res.status(500).send("Server Error");
     }
   }
 
-  return res.status(400).json({ message: 'No user not found' });
+  return res.status(400).json({ message: "No user not found" });
 };
 
 exports.getResponses = async (req, res, next) => {
@@ -461,7 +530,7 @@ exports.getResponses = async (req, res, next) => {
   let companyId = req.company.id;
 
   if (!companyId) {
-    return res.status(400).json({ message: 'Company does not exist' });
+    return res.status(400).json({ message: "Company does not exist" });
   }
 
   const { postId } = req.params;
@@ -469,26 +538,30 @@ exports.getResponses = async (req, res, next) => {
   try {
     let company = await Company.findById(companyId);
 
-    if (!company) return res.status(401).json({ message: 'Company not found' });
+    if (!company) return res.status(401).json({ message: "Company not found" });
 
     if (!company.posts.includes(postId))
-      return res.status(400).json({ message: 'You are not authorized to view these responses.' });
+      return res
+        .status(400)
+        .json({ message: "You are not authorized to view these responses." });
 
     const post = await Post.findById(postId)
       .populate({
-        path: 'responses',
-        populate: { path: 'userId', select: '_id firstname lastname email' },
+        path: "responses",
+        populate: { path: "userId", select: "_id firstname lastname email" },
       })
       .exec();
 
-    if (!post) return res.status(400).json({ message: 'Post not found' });
+    if (!post) return res.status(400).json({ message: "Post not found" });
 
     const { responses } = post;
 
-    return res.status(200).json({ responses, message: 'Responses pulled successfully' });
+    return res
+      .status(200)
+      .json({ responses, message: "Responses pulled successfully" });
   } catch (err) {
     console.log(err);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -506,27 +579,27 @@ exports.savePost = async (req, res, next) => {
     try {
       const user = await User.findById(userId);
 
-      if (!user) return res.status(400).json({ message: 'User not found.' });
+      if (!user) return res.status(400).json({ message: "User not found." });
 
       const post = await Post.findById(postId);
 
-      if (!post) return res.status(400).json({ message: 'Post not found.' });
+      if (!post) return res.status(400).json({ message: "Post not found." });
 
       if (user.savedPosts.includes(post._id))
-        return res.status(400).json({ message: 'Post already saved.' });
+        return res.status(400).json({ message: "Post already saved." });
 
       user.savedPosts.push(post._id);
 
       await user.save();
 
-      return res.status(200).json({ message: 'Post saved successfully.' });
+      return res.status(200).json({ message: "Post saved successfully." });
     } catch (err) {
       console.log(err);
-      res.status(500).send('Server Error');
+      res.status(500).send("Server Error");
     }
   }
 
-  return res.status(400).json({ message: 'User not authenticated.' });
+  return res.status(400).json({ message: "User not authenticated." });
 };
 
 exports.unsavePost = async (req, res, next) => {
@@ -543,14 +616,14 @@ exports.unsavePost = async (req, res, next) => {
     try {
       const user = await User.findById(userId);
 
-      if (!user) return res.status(400).json({ message: 'User not found.' });
+      if (!user) return res.status(400).json({ message: "User not found." });
 
       const post = await Post.findById(postId);
 
-      if (!post) return res.status(400).json({ message: 'Post not found.' });
+      if (!post) return res.status(400).json({ message: "Post not found." });
 
       if (!user.savedPosts.includes(post._id))
-        return res.status(400).json({ message: 'Post not saved.' });
+        return res.status(400).json({ message: "Post not saved." });
 
       user.savedPosts = user.savedPosts.filter((pst) => {
         if (pst.toString() != post._id.toString()) return pst;
@@ -558,14 +631,15 @@ exports.unsavePost = async (req, res, next) => {
 
       await user.save();
 
-      return res
-        .status(200)
-        .json({ message: 'Post saved successfully.', savedPosts: user.savedPosts });
+      return res.status(200).json({
+        message: "Post saved successfully.",
+        savedPosts: user.savedPosts,
+      });
     } catch (err) {
       console.log(err);
-      res.status(500).send('Server Error');
+      res.status(500).send("Server Error");
     }
   }
 
-  return res.status(400).json({ message: 'User not authenticated.' });
+  return res.status(400).json({ message: "User not authenticated." });
 };
