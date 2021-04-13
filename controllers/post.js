@@ -555,7 +555,7 @@ exports.getResponses = async (req, res, next) => {
     const { responses } = post;
 
     responses.sort(function (a, b) {
-      return a.relevance - b.relevance;
+      return !(b.relevance - a.relevance);
     });
 
     return res
