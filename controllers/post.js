@@ -436,14 +436,6 @@ exports.respondToPost = async (req, res, next) => {
           .status(400)
           .json({ message: "User has already applied to post" });
 
-      const response = new Response({
-        userId,
-        resume,
-        skills,
-        status: "Under Review",
-        postId: postId,
-      });
-
       let postString = "";
       let responseString = "";
 
@@ -483,21 +475,27 @@ exports.respondToPost = async (req, res, next) => {
         responseString = responseString.concat(" ");
       });
 
-      response.skills.forEach((skill) => {
+      skills.forEach((skill) => {
         responseString = responseString.concat(
           skill.name + " - " + skill.yearsOfExperience + ", "
         );
       });
-
-      console.log(postString);
-      console.log(responseString);
 
       const similarity = stringSimilarity.compareTwoStrings(
         postString,
         responseString
       );
 
-      response.relevance = (similarity * 100).toFixed(2);
+      let relevance = parseFloat((similarity * 100).toFixed(2));
+
+      const response = new Response({
+        userId,
+        resume,
+        skills,
+        relevance,
+        status: "Under Review",
+        postId: postId,
+      });
 
       post.responses.push(response._id);
       if (post.numberOfResponses) post.numberOfResponses += 1;
@@ -555,6 +553,10 @@ exports.getResponses = async (req, res, next) => {
     if (!post) return res.status(400).json({ message: "Post not found" });
 
     const { responses } = post;
+
+    responses.sort(function (a, b) {
+      return a.relevance - b.relevance;
+    });
 
     return res
       .status(200)
